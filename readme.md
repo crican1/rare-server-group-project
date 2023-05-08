@@ -9,3 +9,5 @@
 1. Run the commands in the `loaddata.sql` file to create the tables in the database
 <!-- TODO: As more of the project is filled in add the other steps to get this project running -->
 
+# rare-server-group-project
+# rare-server-group-project
