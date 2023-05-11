@@ -1,8 +1,8 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
-
+from views import get_all_posts, get_single_post
 from views.user import create_user, login_user
-
+from urllib.parse import urlparse, parse_qs
 
 class HandleRequests(BaseHTTPRequestHandler):
     """Handles the requests to this server"""
