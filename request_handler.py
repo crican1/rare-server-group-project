@@ -66,7 +66,7 @@ class HandleRequests(BaseHTTPRequestHandler):
             ( resource, id ) = parsed
 
             # It's an if..else statement
-            if resource == "animals":
+            if resource == "comments":
                 if id is not None:
                     response = get_single_comment(id)
 
