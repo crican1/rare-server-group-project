@@ -11,6 +11,7 @@ def login_user(user):
     Returns:
         json string: If the user was found will return 
         valid boolean of True and the user's id as the token
+
                      If the user was not found will return valid boolean False
     """
     with sqlite3.connect('./db.sqlite3') as conn:

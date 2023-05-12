@@ -108,7 +108,7 @@ class HandleRequests(BaseHTTPRequestHandler):
 
     def do_PUT(self):
         """Handles PUT requests to the server"""
-        pass
+
 
     def do_DELETE(self):
         """Handle DELETE Requests"""
@@ -124,7 +124,6 @@ class HandleRequests(BaseHTTPRequestHandler):
 
         # Encode the new animal and send in response
             self.wfile.write("".encode())
-
 
 def main():
     """Starts the server on port 8088 using the HandleRequests class
