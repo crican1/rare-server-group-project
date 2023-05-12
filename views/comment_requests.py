@@ -16,10 +16,10 @@ COMMENTS = [
     "content": "This is a comment for another post."
   },
   {
-    "id": 2,
-    "author_id": 2,
-    "post_id": 2,
-    "content": "This is a comment for another post."
+    "id": 3,
+    "author_id": 3,
+    "post_id": 3,
+    "content": "This is a comment for yet another post."
   }
 ]
 
@@ -35,10 +35,10 @@ def get_all_comments():
         db_cursor.execute("""
         SELECT
             c.id,
-            c.author_id
-            c.post_id
+            c.author_id,
+            c.post_id,
             c.content
-        FROM Comment c
+        FROM Comments c
         """)
 
         # Initialize an empty list to hold all comment representations
@@ -74,11 +74,11 @@ def get_single_comment(id):
         db_cursor.execute("""
         SELECT
             c.id,
-            c.author_id
-            c.post_id
+            c.author_id,
+            c.post_id,
             c.content
-        FROM Comment c
-        WHERE a.id = ?
+        FROM Comments c
+        WHERE c.id = ?
         """, ( id, ))
 
         # Load the single result into memory
@@ -91,3 +91,40 @@ def get_single_comment(id):
                           data['content'])
 
         return comment.__dict__
+
+def create_comment(new_comment):
+      # Open a connection to the database
+    with sqlite3.connect("./db.sqlite3") as conn:
+
+        # Just use these. It's a Black Box.
+        db_cursor = conn.cursor()
+
+        db_cursor.execute("""
+        INSERT INTO Comments
+            ( author_id, post_id, content )
+        VALUES
+            ( ?, ?, ?);
+        """, (new_comment['author_id'],
+              new_comment['post_id'],
+              new_comment['content'], ))
+        # The `lastrowid` property on the cursor will return
+        # the primary key of the last thing that got added to
+        # the database.
+        id = db_cursor.lastrowid
+
+        # Add the `id` property to the comment dictionary that
+        # was sent by the client so that the client sees the
+        # primary key in the response.
+        new_comment['id'] = id
+
+
+    return new_comment
+
+def delete_comment(id):
+    with sqlite3.connect("./db.sqlite3") as conn:
+        db_cursor = conn.cursor()
+
+        db_cursor.execute("""
+        DELETE FROM Comments
+        WHERE id = ?
+        """, (id, ))
