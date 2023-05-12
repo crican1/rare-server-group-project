@@ -1,15 +1,16 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
-
-from views.user import create_user, login_user
+from urllib.parse import urlparse, parse_qs
+from views.user_requests import create_user, login_user, get_all_users, get_single_user
 
 
 class HandleRequests(BaseHTTPRequestHandler):
     """Handles the requests to this server"""
 
-    def parse_url(self):
+    def parse_url(self, path):
         """Parse the url into the resource and id"""
-        path_params = self.path.split('/')
+        parsed_url = urlparse(path)
+        path_params = parsed_url.path.split('/')
         resource = path_params[1]
         if '?' in resource:
             param = resource.split('?')[1]
@@ -50,8 +51,27 @@ class HandleRequests(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
-        """Handle Get requests to the server"""
-        pass
+        self._set_headers(200)
+
+        response = {}
+
+        # Parse URL and store entire tuple in a variable
+        parsed = self.parse_url(self.path)
+
+        # If the path does not include a query parameter, continue with the original if block
+        if '?' not in self.path:
+            ( resource, id ) = parsed
+
+            # It's an if..else statement
+        if resource == "users":
+            if id is not None:
+                    response = get_single_user(id)
+
+            else:
+                    response = get_all_users()
+                    
+            
+        self.wfile.write(json.dumps(response).encode())
 
 
     def do_POST(self):
