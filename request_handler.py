@@ -1,12 +1,11 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 from urllib.parse import urlparse
+from views.user_requests import create_user, login_user, get_all_users, get_single_user
 from views import(get_all_comments,
                   get_single_comment,
                   create_comment,
                   delete_comment)
-from views.user import create_user, login_user
-
 class HandleRequests(BaseHTTPRequestHandler):
     """Handles the requests to this server"""
 
@@ -67,10 +66,15 @@ class HandleRequests(BaseHTTPRequestHandler):
             ( resource, id ) = parsed
 
             # It's an if..else statement
+            if resource == "users":
+                if id is not None:
+                    response = get_single_user(id)
+                else:
+                    response = get_all_users()
+
             if resource == "comments":
                 if id is not None:
                     response = get_single_comment(id)
-
                 else:
                     response = get_all_comments()
 

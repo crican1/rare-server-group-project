@@ -6,7 +6,6 @@ CREATE TABLE "Users" (
   "bio" varchar,
   "username" varchar,
   "password" varchar,
-  "profile_image_url" varchar,
   "created_on" date,
   "active" bit
 );
@@ -89,6 +88,13 @@ INSERT INTO Categories ('label') VALUES ('News');
 INSERT INTO Tags ('label') VALUES ('JavaScript');
 INSERT INTO Reactions ('label', 'image_url') VALUES ('happy', 'https://pngtree.com/so/happy');
 
+<<<<<<< HEAD
+INSERT INTO `Users` VALUES (null, "Charles", "Bridgers", "mcmaster@gmail.com", "This is your favorite local hip-hop host!", "c4theexplosive", "password", 8/6/2022, False);
+INSERT INTO `Users` VALUES (null, "Instructor", "Danny", "pythonnerd12@gmail.com", "Junior instructor for NSS!", "dantheman", "password", 6/12/2022, False);
+INSERT INTO `Users` VALUES (null, "Angie", "Gonzalez", "eagleeyeangie@gmail.com", "Music theory and coding wiz!", "eagleeyeangie", "password", 2/4/2023, False);
+
+DROP TABLE Users;
+=======
 CREATE TABLE `Comment` (
     `id`    INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     `author_id`    TEXT NOT NULL,
@@ -112,3 +118,4 @@ CREATE TABLE "Comments" (
 INSERT INTO `Comments` VALUES (null, 1, 1, "This is a comment for a post.");
 INSERT INTO `Comments` VALUES (2, 2, 2, "This is a comment for another post.");
 INSERT INTO `Comments` VALUES (3, 3, 3, "This is a comment for yet another post.");
+>>>>>>> main
