@@ -88,3 +88,27 @@ CREATE TABLE "Categories" (
 INSERT INTO Categories ('label') VALUES ('News');
 INSERT INTO Tags ('label') VALUES ('JavaScript');
 INSERT INTO Reactions ('label', 'image_url') VALUES ('happy', 'https://pngtree.com/so/happy');
+
+CREATE TABLE `Comment` (
+    `id`    INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    `author_id`    TEXT NOT NULL,
+    `post_id`    TEXT NOT NULL,
+    `content`    TEXT NOT NULL
+);
+
+INSERT INTO `Comment` VALUES (1, 1, 1, "This is a comment for a post.");
+INSERT INTO `Comment` VALUES (2, 2, 2, "This is a comment for another post.");
+INSERT INTO `Comment` VALUES (3, 3, 3, "This is a comment for yet another post.");
+
+CREATE TABLE "Comments" (
+  "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  "post_id" INTEGER NOT NULL,
+  "author_id" INTEGER NOT NULL,
+  "content" TEXT NOT NULL,
+  FOREIGN KEY(`post_id`) REFERENCES `Posts`(`id`),
+  FOREIGN KEY(`author_id`) REFERENCES `Users`(`id`)
+);
+
+INSERT INTO `Comments` VALUES (null, 1, 1, "This is a comment for a post.");
+INSERT INTO `Comments` VALUES (2, 2, 2, "This is a comment for another post.");
+INSERT INTO `Comments` VALUES (3, 3, 3, "This is a comment for yet another post.");
