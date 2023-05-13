@@ -88,3 +88,15 @@ CREATE TABLE "Categories" (
 INSERT INTO Categories ('label') VALUES ('News');
 INSERT INTO Tags ('label') VALUES ('JavaScript');
 INSERT INTO Reactions ('label', 'image_url') VALUES ('happy', 'https://pngtree.com/so/happy');
+
+SELECT
+    p.id,
+    p.user_id,
+    p.title,
+    p.publication_date,
+    p.content,
+    u.first_name user_first_name,
+    u.last_name user_last_name,    
+FROM Posts p
+JOIN Users u
+    ON u.id = p.user_id

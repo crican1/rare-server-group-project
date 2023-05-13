@@ -52,8 +52,8 @@ def get_all_posts():
             p.content,
             u.first_name user_first_name,
             u.last_name user_last_name,    
-        FROM posts p
-        JOIN User u
+        FROM Posts p
+        JOIN Users u
             ON u.id = p.user_id
         """)
 
@@ -97,7 +97,7 @@ def get_single_post(id):
             p.title,
             p.publication_date,
             p.content
-        FROM post p
+        FROM Posts p
         WHERE p.id = ?
         """, (id, ))
 
