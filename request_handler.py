@@ -1,7 +1,7 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 from urllib.parse import urlparse
-from views.user_requests import create_user, login_user, get_all_users, get_single_user
+from views.user_requests import create_user, login_user, get_all_users, get_single_user, update_user, delete_user
 from views import(get_all_comments,
                   get_single_comment,
                   create_comment,
@@ -87,32 +87,41 @@ class HandleRequests(BaseHTTPRequestHandler):
         post_body = json.loads(self.rfile.read(content_len))
 
         # Convert JSON string to a Python dictionary
-        post_body = json.dumps(post_body)
         response = ''
         (resource, id ) = self.parse_url(self.path)
 
-        if resource == 'login':
+        if resource == "login":
             response = login_user(post_body)
-        if resource == 'register':
+        elif resource == "register":
             response = create_user(post_body)
-
-        self.wfile.write(response.encode())
-
-        # Initialize new comment
-        new_comment = None
-
-        # Add a new comment to the list. Don't worry about
-        # the orange squiggle, you'll define the create_comment
-        # function next.
-        if resource == "comments":
-            new_comment = create_comment(post_body)
+        elif resource == "users":
+            response = create_user(post_body)
+        elif resource == "comments":
+            response = create_comment(post_body)
 
         # Encode the new comment and send in response
-            self.wfile.write(json.dumps(new_comment).encode())
+        self.wfile.write(response.encode())
 
     def do_PUT(self):
-        """Handles PUT requests to the server"""
+        self._set_headers(204)
+        content_len = int(self.headers.get('content-length', 0))
+        post_body = self.rfile.read(content_len)
+        post_body = json.loads(post_body)
 
+        # Parse the URL
+        (resource, id) = self.parse_url(self.path)
+
+        success = False
+        
+        # Delete a single animal from the list
+        if resource == "users":
+            success = update_user(id, post_body)
+        if success:
+            self._set_headers(204)
+        else:
+            self._set_headers(404)
+        
+        self.wfile.write("".encode())
 
     def do_DELETE(self):
         """Handle DELETE Requests"""
@@ -122,6 +131,8 @@ class HandleRequests(BaseHTTPRequestHandler):
         # Parse the URL
         (resource, id) = self.parse_url(self.path)
 
+        if resource == "users":
+            delete_user(id)
         # Delete a single comment from the list
         if resource == "comments":
             delete_comment(id)
