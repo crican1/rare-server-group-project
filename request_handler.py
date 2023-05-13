@@ -5,7 +5,7 @@ from views.user_requests import create_user, login_user, get_all_users, get_sing
 from views import(get_all_comments,
                   get_single_comment,
                   create_comment,
-                  delete_comment)
+                  delete_comment, get_all_posts, get_single_post, create_post, delete_post, update_post)
 from views import(get_all_subscriptions,
                   get_single_subscription,
                   create_subscription,
@@ -82,13 +82,19 @@ class HandleRequests(BaseHTTPRequestHandler):
                     response = get_single_comment(id)
                 else:
                     response = get_all_comments()
-
+                    
             if resource == "subscriptions":
                 if id is not None:
                     response = get_single_subscription(id)
 
                 else:
                     response = get_all_subscriptions()
+
+            if resource == "posts":
+                if id is not None:
+                    response = get_single_post(id)
+                else:
+                    response = get_all_posts()
 
         self.wfile.write(json.dumps(response).encode())
 
@@ -99,31 +105,60 @@ class HandleRequests(BaseHTTPRequestHandler):
         post_body = json.loads(self.rfile.read(content_len))
 
         # Convert JSON string to a Python dictionary
+        post_body = json.dumps(post_body)
         response = ''
         (resource, id ) = self.parse_url(self.path)
 
         if resource == 'login':
             response = login_user(post_body)
-        if resource == 'register':
+        elif resource == 'register':
             response = create_user(post_body)
         if resource == 'subscriptions':
             response = create_subscription(post_body)
         if resource == 'comments':
             response = create_comment(post_body)
+        elif resource == "comments":
+            response = create_comment(post_body)
+        elif resource == "posts":
+            response = create_post(post_body)
+
 
         self.wfile.write(response.encode())
 
         # Initialize new comment
+        new_comment = None
 
         # Add a new comment to the list. Don't worry about
         # the orange squiggle, you'll define the create_comment
         # function next.
+        if resource == "comments":
+            new_comment = create_comment(post_body)
 
         # Encode the new comment and send in response
+            self.wfile.write(json.dumps(new_comment).encode())
 
     def do_PUT(self):
         """Handles PUT requests to the server"""
+        content_len = int(self.headers.get('content-length', 0))
+        post_body = self.rfile.read(content_len)
+        post_body = json.loads(post_body)
 
+        # Parse the URL
+        (resource, id) = self.parse_url(self.path)
+
+        success = False
+        
+        # Delete a single animal from the list
+        if resource == "posts":
+           success = update_post(id, post_body)
+           
+        if success:
+            self._set_headers(204)
+        else:
+            self._set_headers(404)
+            
+        # Encode the new animal and send in response
+        self.wfile.write("".encode())
 
     def do_DELETE(self):
         """Handle DELETE Requests"""
@@ -138,6 +173,8 @@ class HandleRequests(BaseHTTPRequestHandler):
             delete_comment(id)
         if resource == "subscriptions":
             delete_subscription(id)
+        elif resource == "posts":
+            delete_post(id)
 
         # Encode the new animal and send in response
             self.wfile.write("".encode())
