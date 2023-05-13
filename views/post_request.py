@@ -49,12 +49,8 @@ def get_all_posts():
             p.user_id,
             p.title,
             p.publication_date,
-            p.content,
-            u.first_name user_first_name,
-            u.last_name user_last_name    
+            p.content    
         FROM Posts p
-        JOIN Users u
-            ON u.id = p.user_id
         """)
 
         # Initialize an empty list to hold all animal representations
@@ -71,11 +67,11 @@ def get_all_posts():
                             row['content'])
 
             # Create a Location instance from the current row
-            user = User(
-                row['id'], ['user_first_name'], row['user_last_name'])
+            # user = User(
+            #     row['id'], ['user_first_name'], row['user_last_name'])
 
             # # Add the dictionary representation of the location to the animal
-            post.user = user.__dict__
+            # post.user = user.__dict__
 
             # Add the dictionary representation of the animal to the list
             posts.append(post.__dict__)
@@ -84,7 +80,7 @@ def get_all_posts():
 
 
 def get_single_post(id):
-    with sqlite3.connect("./kennel.sqlite3") as conn:
+    with sqlite3.connect("./db.sqlite3") as conn:
         conn.row_factory = sqlite3.Row
         db_cursor = conn.cursor()
 
@@ -137,7 +133,7 @@ def create_post(new_post):
         # primary key in the response.
         new_post['id'] = id
 
-    return new_post
+    return json.dumps(new_post)
 
 def delete_post(id):
     with sqlite3.connect("./db.sqlite3") as conn:
@@ -150,10 +146,31 @@ def delete_post(id):
         
 
 def update_post(id, new_post):
-    # Iterate the ANIMALS list, but use enumerate() so that
-    # you can access the index value of each item.
-    for index, post in enumerate(POSTS):
-        if post["id"] == id:
-            # Found the animal. Update the value.
-            POSTS[index] = new_post
-            break
+    """To PUT a post"""
+    # Open a connection to the database
+    with sqlite3.connect("./db.sqlite3") as conn:
+        # Just use these. It’s a Black Box.
+        db_cursor = conn.cursor()
+        db_cursor.execute("""
+                          UPDATE Posts
+                          SET
+                          user_id= ?,
+                          title= ?,
+                          publication_date= ?,
+                          content= ?
+                          WHERE id=?
+                          """, (new_post['user_id'],
+                                new_post['title'],
+                                new_post['publication_date'],
+                                new_post['content'],
+                                id, ))
+        # Were any rows affected?
+        # Did the client send an `id` that exists?
+        rows_affected = db_cursor.rowcount
+        # return value of this function
+    if rows_affected == 0:
+        # Forces 404 response by main module
+        return False
+    else:
+        # Forces 204 response by main module
+        return True

@@ -92,41 +92,30 @@ class HandleRequests(BaseHTTPRequestHandler):
         content_len = int(self.headers.get('content-length', 0))
         post_body = json.loads(self.rfile.read(content_len))
 
-        # Convert JSON string to a Python dictionary
-        post_body = json.dumps(post_body)
+        # Convert JSON string to a Python dictionar
         response = ''
         (resource, id ) = self.parse_url(self.path)
 
         if resource == 'login':
             response = login_user(post_body)
-        if resource == 'register':
+        elif resource == 'register':
             response = create_user(post_body)
+        elif resource == "comments":
+            response = create_comment(post_body)
+        elif resource == "posts":
+            response = create_post(post_body)
+
 
         self.wfile.write(response.encode())
 
         # Initialize new comment
-        new_comment = None
+        
 
         # Add a new comment to the list. Don't worry about
         # the orange squiggle, you'll define the create_comment
         # function next.
-        if resource == "comments":
-            new_comment = create_comment(post_body)
-
-        # Encode the new comment and send in response
-            self.wfile.write(json.dumps(new_comment).encode())
-            
-        new_post = None
-            
-        if resource == "posts":
-            new_post = create_post(post_body)
-            
-            self.wfile.write(json.dumps(new_post).encode())
-            
-
     def do_PUT(self):
         """Handles PUT requests to the server"""
-        self._set_headers(204)
         content_len = int(self.headers.get('content-length', 0))
         post_body = self.rfile.read(content_len)
         post_body = json.loads(post_body)
@@ -134,9 +123,16 @@ class HandleRequests(BaseHTTPRequestHandler):
         # Parse the URL
         (resource, id) = self.parse_url(self.path)
 
+        success = False
+        
         # Delete a single animal from the list
         if resource == "posts":
-            update_post(id, post_body)
+           success = update_post(id, post_body)
+           
+        if success:
+            self._set_headers(204)
+        else:
+            self._set_headers(404)
             
         # Encode the new animal and send in response
         self.wfile.write("".encode())
