@@ -5,7 +5,8 @@ from views.user_requests import create_user, login_user, get_all_users, get_sing
 from views import(get_all_comments,
                   get_single_comment,
                   create_comment,
-                  delete_comment, get_all_posts, get_single_post, create_post, delete_post, update_post)
+                  delete_comment, get_all_posts, get_single_post, create_post,
+                  delete_post, update_post)
 from views import(get_all_subscriptions,
                   get_single_subscription,
                   create_subscription,
@@ -82,7 +83,7 @@ class HandleRequests(BaseHTTPRequestHandler):
                     response = get_single_comment(id)
                 else:
                     response = get_all_comments()
-                    
+
             if resource == "subscriptions":
                 if id is not None:
                     response = get_single_subscription(id)
@@ -147,16 +148,16 @@ class HandleRequests(BaseHTTPRequestHandler):
         (resource, id) = self.parse_url(self.path)
 
         success = False
-        
+
         # Delete a single animal from the list
         if resource == "posts":
-           success = update_post(id, post_body)
-           
+            success = update_post(id, post_body)
+
         if success:
             self._set_headers(204)
         else:
             self._set_headers(404)
-            
+
         # Encode the new animal and send in response
         self.wfile.write("".encode())
 
