@@ -1,16 +1,18 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
-from views import get_all_posts, get_single_post
-from views.user import create_user, login_user
-from urllib.parse import urlparse, parse_qs
-
+from urllib.parse import urlparse
+from views.user_requests import create_user, login_user, get_all_users, get_single_user
+from views import(get_all_comments,
+                  get_single_comment,
+                  create_comment,
+                  delete_comment)
 class HandleRequests(BaseHTTPRequestHandler):
     """Handles the requests to this server"""
 
     def parse_url(self, path):
         """Parse the url into the resource and id"""
         parsed_url = urlparse(path)
-        path_params = parsed_url.path.split('/')  # ['', 'animals', 1]
+        path_params = parsed_url.path.split('/')
         resource = path_params[1]
 
         if parsed_url.query:
@@ -62,6 +64,7 @@ class HandleRequests(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
+        """Handle Get requests to the server"""
         self._set_headers(200)
 
         response = {}
@@ -71,24 +74,33 @@ class HandleRequests(BaseHTTPRequestHandler):
 
         # If the path does not include a query parameter, continue with the original if block
         if '?' not in self.path:
-            (resource, id) = parsed
+            ( resource, id ) = parsed
 
             # It's an if..else statement
-            if resource == "posts":
+            if resource == "users":
                 if id is not None:
-                    response = get_single_post(id)
-
+                    response = get_single_user(id)
                 else:
-                    response = get_all_posts()
+                    response = get_all_users()
 
+            if resource == "comments":
+                if id is not None:
+                    response = get_single_comment(id)
+                else:
+                    response = get_all_comments()
+
+        self.wfile.write(json.dumps(response).encode())
 
     def do_POST(self):
         """Make a post request to the server"""
         self._set_headers(201)
         content_len = int(self.headers.get('content-length', 0))
         post_body = json.loads(self.rfile.read(content_len))
+
+        # Convert JSON string to a Python dictionary
+        post_body = json.dumps(post_body)
         response = ''
-        resource, _ = self.parse_url()
+        (resource, id ) = self.parse_url(self.path)
 
         if resource == 'login':
             response = login_user(post_body)
@@ -97,14 +109,36 @@ class HandleRequests(BaseHTTPRequestHandler):
 
         self.wfile.write(response.encode())
 
+        # Initialize new comment
+        new_comment = None
+
+        # Add a new comment to the list. Don't worry about
+        # the orange squiggle, you'll define the create_comment
+        # function next.
+        if resource == "comments":
+            new_comment = create_comment(post_body)
+
+        # Encode the new comment and send in response
+            self.wfile.write(json.dumps(new_comment).encode())
+
     def do_PUT(self):
         """Handles PUT requests to the server"""
-        pass
+
 
     def do_DELETE(self):
         """Handle DELETE Requests"""
-        pass
+    # Set a 204 response code
+        self._set_headers(204)
 
+        # Parse the URL
+        (resource, id) = self.parse_url(self.path)
+
+        # Delete a single comment from the list
+        if resource == "comments":
+            delete_comment(id)
+
+        # Encode the new animal and send in response
+            self.wfile.write("".encode())
 
 def main():
     """Starts the server on port 8088 using the HandleRequests class
