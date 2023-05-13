@@ -5,7 +5,7 @@ from views.user_requests import create_user, login_user, get_all_users, get_sing
 from views import(get_all_comments,
                   get_single_comment,
                   create_comment,
-                  delete_comment)
+                  delete_comment, get_all_posts, get_single_post, create_post, delete_post, update_post)
 class HandleRequests(BaseHTTPRequestHandler):
     """Handles the requests to this server"""
 
@@ -14,31 +14,20 @@ class HandleRequests(BaseHTTPRequestHandler):
         parsed_url = urlparse(path)
         path_params = parsed_url.path.split('/')
         resource = path_params[1]
-
-        if parsed_url.query:
-            query = parse_qs(parsed_url.query)
-            return (resource, query)
-
-        pk = None
-        try:
-            pk = int(path_params[2])
-        except (IndexError, ValueError):
-            pass
-        return (resource, pk)
-    # Here's a class function
-
-    def _set_headers(self, status):
-        # Notice this Docstring also includes information about the arguments passed to the function
-        """Sets the status code, Content-Type and Access-Control-Allow-Origin
-        headers on the response
-
-        Args:
-            status (number): the status code to return to the front end
-        """
-        self.send_response(status)
-        self.send_header('Content-type', 'application/json')
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.end_headers()
+        if '?' in resource:
+            param = resource.split('?')[1]
+            resource = resource.split('?')[0]
+            pair = param.split('=')
+            key = pair[0]
+            value = pair[1]
+            return (resource, key, value)
+        else:
+            id = None
+            try:
+                id = int(path_params[2])
+            except (IndexError, ValueError):
+                pass
+            return (resource, id)
 
     def _set_headers(self, status):
         """Sets the status code, Content-Type and Access-Control-Allow-Origin
@@ -88,6 +77,12 @@ class HandleRequests(BaseHTTPRequestHandler):
                     response = get_single_comment(id)
                 else:
                     response = get_all_comments()
+                    
+            if resource == "posts":
+                if id is not None:
+                    response = get_single_post(id)
+                else:
+                    response = get_all_posts()
 
         self.wfile.write(json.dumps(response).encode())
 
@@ -120,10 +115,31 @@ class HandleRequests(BaseHTTPRequestHandler):
 
         # Encode the new comment and send in response
             self.wfile.write(json.dumps(new_comment).encode())
+            
+        new_post = None
+            
+        if resource == "posts":
+            new_post = create_post(post_body)
+            
+            self.wfile.write(json.dumps(new_post).encode())
+            
 
     def do_PUT(self):
         """Handles PUT requests to the server"""
+        self._set_headers(204)
+        content_len = int(self.headers.get('content-length', 0))
+        post_body = self.rfile.read(content_len)
+        post_body = json.loads(post_body)
 
+        # Parse the URL
+        (resource, id) = self.parse_url(self.path)
+
+        # Delete a single animal from the list
+        if resource == "posts":
+            update_post(id, post_body)
+            
+        # Encode the new animal and send in response
+        self.wfile.write("".encode())
 
     def do_DELETE(self):
         """Handle DELETE Requests"""
@@ -136,6 +152,8 @@ class HandleRequests(BaseHTTPRequestHandler):
         # Delete a single comment from the list
         if resource == "comments":
             delete_comment(id)
+        elif resource == "posts":
+            delete_post(id)
 
         # Encode the new animal and send in response
             self.wfile.write("".encode())
