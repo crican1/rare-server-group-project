@@ -5,7 +5,8 @@ from views.user_requests import create_user, login_user, get_all_users, get_sing
 from views import(get_all_comments,
                   get_single_comment,
                   create_comment,
-                  delete_comment)
+                  delete_comment,
+                  update_comment)
 class HandleRequests(BaseHTTPRequestHandler):
     """Handles the requests to this server"""
 
@@ -87,7 +88,6 @@ class HandleRequests(BaseHTTPRequestHandler):
         post_body = json.loads(self.rfile.read(content_len))
 
         # Convert JSON string to a Python dictionary
-        post_body = json.dumps(post_body)
         response = ''
         (resource, id ) = self.parse_url(self.path)
 
@@ -95,23 +95,39 @@ class HandleRequests(BaseHTTPRequestHandler):
             response = login_user(post_body)
         if resource == 'register':
             response = create_user(post_body)
-
-        self.wfile.write(response.encode())
-
-        # Initialize new comment
-        new_comment = None
-
         # Add a new comment to the list. Don't worry about
         # the orange squiggle, you'll define the create_comment
         # function next.
         if resource == "comments":
-            new_comment = create_comment(post_body)
+            response = create_comment(post_body)
 
-        # Encode the new comment and send in response
-            self.wfile.write(json.dumps(new_comment).encode())
+        self.wfile.write(response.encode())
+
 
     def do_PUT(self):
         """Handles PUT requests to the server"""
+        content_len = int(self.headers.get('content-length', 0))
+        post_body = self.rfile.read(content_len)
+        post_body = json.loads(post_body)
+
+         # Parse the URL
+        (resource, id) = self.parse_url(self.path)
+
+         # set default value of success
+        success = False
+
+        # Delete a single comment from the list
+        if resource == "comments":
+            success = update_comment(id, post_body)
+
+                # handle the value of success
+        if success:
+            self._set_headers(204)
+        else:
+            self._set_headers(404)
+
+        # Encode the new comment and send in response
+        self.wfile.write("".encode())
 
 
     def do_DELETE(self):
@@ -126,7 +142,7 @@ class HandleRequests(BaseHTTPRequestHandler):
         if resource == "comments":
             delete_comment(id)
 
-        # Encode the new animal and send in response
+        # Encode the new user and send in response
             self.wfile.write("".encode())
 
 def main():

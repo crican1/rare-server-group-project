@@ -1,6 +1,6 @@
 import sqlite3
 import json
-from models import Comment
+from models import Comment, User
 
 COMMENTS = [
   {
@@ -24,6 +24,7 @@ COMMENTS = [
 ]
 
 def get_all_comments():
+    """To GET all comments"""
     # Open a connection to the database
     with sqlite3.connect("./db.sqlite3") as conn:
 
@@ -37,8 +38,19 @@ def get_all_comments():
             c.id,
             c.author_id,
             c.post_id,
-            c.content
+            c.content,
+            u.id user_id,
+            u.first_name,
+            u.last_name,
+            u.email,
+            u.bio,
+            u.username,
+            u.password,
+            u.created_on,
+            u.active
         FROM Comments c
+        JOIN Users u
+            ON u.id = c.author_id            
         """)
 
         # Initialize an empty list to hold all comment representations
@@ -50,11 +62,34 @@ def get_all_comments():
         # Iterate list of data returned from database
         for row in dataset:
 
-            # Create an comment instance from the current row
+            # Create a comment instance from the current row
             comment = Comment(row['id'],
                               row['author_id'],
                               row['post_id'],
-                              row['content'])
+                              row['content'],
+                              row['user_id'],
+                              row['first_name'],
+                              row['last_name'],
+                              row['email'],
+                              row['bio'],
+                              row['username'],
+                              row['password'],
+                              row['created_on'],
+                              row['active'])
+
+            # Create a user instance from the current row
+            user = User(row['user_id'],
+                        row['first_name'],
+                        row['last_name'],
+                        row['email'],
+                        row['bio'],
+                        row['username'],
+                        row['password'],
+                        row['created_on'],
+                        row['active'])
+
+            # Add the dictionary representation of the user to the comment
+            comment.user = user.__dict__
 
             # Add the dictionary representation of the comment to the list
             comments.append(comment.__dict__)
@@ -62,6 +97,7 @@ def get_all_comments():
     return comments
 
 def get_single_comment(id):
+    """To GET a single comment"""
     # Open a connection to the database
     with sqlite3.connect("./db.sqlite3") as conn:
 
@@ -76,23 +112,44 @@ def get_single_comment(id):
             c.id,
             c.author_id,
             c.post_id,
-            c.content
+            c.content,
+            u.id user_id,
+            u.first_name,
+            u.last_name,
+            u.email,
+            u.bio,
+            u.username,
+            u.password,
+            u.created_on,
+            u.active
         FROM Comments c
+        JOIN Users u
+            ON u.id = c.author_id
         WHERE c.id = ?
         """, ( id, ))
 
         # Load the single result into memory
         data = db_cursor.fetchone()
 
-        # Create an comment instance from the current row
+        # Create a comment instance from the current row
         comment = Comment(data['id'],
                           data['author_id'],
                           data['post_id'],
-                          data['content'])
+                          data['content'],
+                          data['user_id'],
+                          data['first_name'],
+                          data['last_name'],
+                          data['email'],
+                          data['bio'],
+                          data['username'],
+                          data['password'],
+                          data['created_on'],
+                          data['active'])
 
         return comment.__dict__
 
 def create_comment(new_comment):
+    """To POST a comment"""
       # Open a connection to the database
     with sqlite3.connect("./db.sqlite3") as conn:
 
@@ -118,9 +175,10 @@ def create_comment(new_comment):
         new_comment['id'] = id
 
 
-    return new_comment
+    return json.dumps(new_comment)
 
 def delete_comment(id):
+    """To DELETE a comment"""
     with sqlite3.connect("./db.sqlite3") as conn:
         db_cursor = conn.cursor()
 
@@ -128,3 +186,35 @@ def delete_comment(id):
         DELETE FROM Comments
         WHERE id = ?
         """, (id, ))
+
+def update_comment(id, new_comment):
+    """To PUT a comment"""
+      # Open a connection to the database
+    with sqlite3.connect("./db.sqlite3") as conn:
+
+        # Just use these. It's a Black Box.
+        db_cursor = conn.cursor()
+
+        db_cursor.execute("""
+        UPDATE Comments
+            SET
+                author_id = ?,
+                post_id = ?,
+                content = ?
+        WHERE id=?
+        """, (new_comment['author_id'],
+             new_comment['post_id'],
+             new_comment['content'],
+             id, ))
+
+        # Were any rows affected?
+        # Did the client send an `id` that exists?
+        rows_affected = db_cursor.rowcount
+
+        # return value of this function
+    if rows_affected == 0:
+        # Forces 404 response by main module
+        return False
+    else:
+        # Forces 204 response by main module
+        return True
