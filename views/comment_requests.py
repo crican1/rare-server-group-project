@@ -24,6 +24,8 @@ COMMENTS = [
 ]
 
 def get_all_comments():
+    """DOCSTRING
+    """
     # Open a connection to the database
     with sqlite3.connect("./db.sqlite3") as conn:
 

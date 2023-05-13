@@ -112,3 +112,6 @@ CREATE TABLE "Comments" (
 INSERT INTO `Comments` VALUES (null, 1, 1, "This is a comment for a post.");
 INSERT INTO `Comments` VALUES (2, 2, 2, "This is a comment for another post.");
 INSERT INTO `Comments` VALUES (3, 3, 3, "This is a comment for yet another post.");
+
+INSERT INTO `Subscriptions` VALUES (null, 1, 3, CURRENT_DATE);
+INSERT INTO `Subscriptions` VALUES (2, 2, 3, CURRENT_DATE);

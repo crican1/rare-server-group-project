@@ -6,6 +6,8 @@ from views import(get_all_comments,
                   create_comment,
                   delete_comment)
 from views.user import create_user, login_user
+from views import(get_all_subscriptions,
+                  get_single_subscription)
 
 class HandleRequests(BaseHTTPRequestHandler):
     """Handles the requests to this server"""
@@ -73,6 +75,13 @@ class HandleRequests(BaseHTTPRequestHandler):
 
                 else:
                     response = get_all_comments()
+
+            if resource == "subscriptions":
+                if id is not None:
+                    response = get_single_subscription(id)
+
+                else:
+                    response = get_all_subscriptions()
 
         self.wfile.write(json.dumps(response).encode())
 

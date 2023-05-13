@@ -5,15 +5,15 @@ from models import Subscription
 SUBSCRIPTIONS = [
     {
         "id": 1,
-        "follower_id": 2,
-        "author_id": "Nashville North",
-        "created_on": "8422 Johnson Pike"
+        "follower_id": 1,
+        "author_id": 3,
+        "created_on": '6/11/2022'
     },
     {
         "id": 2,
         "follower_id": 2,
-        "author_id": "Nashville North",
-        "created_on": "8422 Johnson Pike"
+        "author_id": 3,
+        "created_on": '6/12/2022'
     }
 ]
 
@@ -34,7 +34,7 @@ def get_all_subscriptions():
             a.follower_id,
             a.author_id,
             a.created_on
-        FROM subscription a
+        FROM Subscriptions a
         """)
 
         # Initialize an empty list to hold all animal representations
@@ -73,7 +73,7 @@ def get_single_subscription(id):
             a.follower_id,
             a.author_id,
             a.created_on
-        FROM subscription a
+        FROM Subscriptions a
         WHERE a.id = ?
         """, ( id, ))
 
