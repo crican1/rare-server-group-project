@@ -86,37 +86,43 @@ def get_single_subscription(id):
 
         return subscription.__dict__
 
-def create_subscription(subscription):
+def create_subscription(new_subscription):
     """DOCSTRING
     """
-    # Get the id value of the last animal in the list
-    max_id = SUBSCRIPTIONS[-1]["id"]
+      # Open a connection to the database
+    with sqlite3.connect("./db.sqlite3") as conn:
 
-    # Add 1 to whatever that number is
-    new_id = max_id + 1
+        # Just use these. It's a Black Box.
+        db_cursor = conn.cursor()
 
-    # Add an `id` property to the animal dictionary
-    subscription["id"] = new_id
+        db_cursor.execute("""
+        INSERT INTO Subscriptions
+            ( author_id, follower_id, created_on )
+        VALUES
+            ( ?, ?, ?);
+        """, (new_subscription['author_id'],
+              new_subscription['follower_id'],
+              new_subscription['created_on'], ))
+        # The `lastrowid` property on the cursor will return
+        # the primary key of the last thing that got added to
+        # the database.
+        id = db_cursor.lastrowid
 
-    # Add the animal dictionary to the list
-    SUBSCRIPTIONS.append(subscription)
+        # Add the `id` property to the comment dictionary that
+        # was sent by the client so that the client sees the
+        # primary key in the response.
+        new_subscription['id'] = id
 
-    # Return the dictionary with `id` property added
-    return subscription
+
+    return json.dumps(new_subscription)
 
 def delete_subscription(id):
     """DOCSTRING
     """
-    # Initial -1 value for animal index, in case one isn't found
-    subscription_index = -1
+    with sqlite3.connect("./db.sqlite3") as conn:
+        db_cursor = conn.cursor()
 
-    # Iterate the ANIMALS list, but use enumerate() so that you
-    # can access the index value of each item
-    for index, subscription in enumerate(SUBSCRIPTIONS):
-        if subscription["id"] == id:
-            # Found the animal. Store the current index.
-            subscription_index = index
-
-    # If the animal was found, use pop(int) to remove it from list
-    if subscription_index >= 0:
-        SUBSCRIPTIONS.pop(subscription_index)
+        db_cursor.execute("""
+        DELETE FROM Subscriptions
+        WHERE id = ?
+        """, (id, ))

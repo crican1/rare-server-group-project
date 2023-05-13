@@ -64,6 +64,8 @@ def get_all_comments():
     return comments
 
 def get_single_comment(id):
+    """DOCSTRING
+    """
     # Open a connection to the database
     with sqlite3.connect("./db.sqlite3") as conn:
 
@@ -95,6 +97,8 @@ def get_single_comment(id):
         return comment.__dict__
 
 def create_comment(new_comment):
+    """DOCSTRING
+    """
       # Open a connection to the database
     with sqlite3.connect("./db.sqlite3") as conn:
 
@@ -120,9 +124,11 @@ def create_comment(new_comment):
         new_comment['id'] = id
 
 
-    return new_comment
+    return json.dumps(new_comment)
 
 def delete_comment(id):
+    """DOCSTRING
+    """
     with sqlite3.connect("./db.sqlite3") as conn:
         db_cursor = conn.cursor()
 

@@ -7,7 +7,9 @@ from views import(get_all_comments,
                   delete_comment)
 from views.user import create_user, login_user
 from views import(get_all_subscriptions,
-                  get_single_subscription)
+                  get_single_subscription,
+                  create_subscription,
+                  delete_subscription)
 
 class HandleRequests(BaseHTTPRequestHandler):
     """Handles the requests to this server"""
@@ -92,7 +94,6 @@ class HandleRequests(BaseHTTPRequestHandler):
         post_body = json.loads(self.rfile.read(content_len))
 
         # Convert JSON string to a Python dictionary
-        post_body = json.dumps(post_body)
         response = ''
         (resource, id ) = self.parse_url(self.path)
 
@@ -100,20 +101,20 @@ class HandleRequests(BaseHTTPRequestHandler):
             response = login_user(post_body)
         if resource == 'register':
             response = create_user(post_body)
+        if resource == 'subscriptions':
+            response = create_subscription(post_body)
+        if resource == 'comments':
+            response = create_comment(post_body)
 
         self.wfile.write(response.encode())
 
         # Initialize new comment
-        new_comment = None
 
         # Add a new comment to the list. Don't worry about
         # the orange squiggle, you'll define the create_comment
         # function next.
-        if resource == "comments":
-            new_comment = create_comment(post_body)
 
         # Encode the new comment and send in response
-            self.wfile.write(json.dumps(new_comment).encode())
 
     def do_PUT(self):
         """Handles PUT requests to the server"""
@@ -130,6 +131,8 @@ class HandleRequests(BaseHTTPRequestHandler):
         # Delete a single comment from the list
         if resource == "comments":
             delete_comment(id)
+        if resource == "subscriptions":
+            delete_subscription(id)
 
         # Encode the new animal and send in response
             self.wfile.write("".encode())
