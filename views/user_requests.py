@@ -16,7 +16,7 @@ USERS = [
         "active": False
     },
     {
-        "id": 1,
+        "id": 2,
         "first_name": "Instructor",
         "last_name": "Danny",
         "email": "pythonnerd12@gmail.com",
@@ -27,7 +27,7 @@ USERS = [
         "active": False
     },
     {
-        "id": 1,
+        "id": 3,
         "first_name": "Angie",
         "last_name": "Gonzalez",
         "email": "eagleeyeangie@gmail.com",

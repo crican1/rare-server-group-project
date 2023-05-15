@@ -117,7 +117,6 @@ CREATE TABLE "Comments" (
 INSERT INTO `Comments` VALUES (null, 1, 1, "This is a comment for a post.");
 INSERT INTO `Comments` VALUES (2, 2, 2, "This is a comment for another post.");
 INSERT INTO `Comments` VALUES (3, 3, 3, "This is a comment for yet another post.");
->>>>>>> main
 
 DROP Table Users;
 
@@ -141,4 +140,3 @@ SELECT
 FROM Comments c
 JOIN Users u
     ON u.id = c.author_id
-WHERE c.id = 3

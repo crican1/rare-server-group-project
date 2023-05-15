@@ -146,6 +146,19 @@ def get_single_comment(id):
                           data['created_on'],
                           data['active'])
 
+
+        user = User(data['user_id'],
+                          data['first_name'],
+                          data['last_name'],
+                          data['email'],
+                          data['bio'],
+                          data['username'],
+                          data['password'],
+                          data['created_on'],
+                          data['active'])
+
+        comment.user = user.__dict__
+
         return comment.__dict__
 
 def create_comment(new_comment):
@@ -203,8 +216,8 @@ def update_comment(id, new_comment):
                 content = ?
         WHERE id=?
         """, (new_comment['author_id'],
-             new_comment['post_id'],
-             new_comment['content'],
+              new_comment['post_id'],
+              new_comment['content'],
              id, ))
 
         # Were any rows affected?
