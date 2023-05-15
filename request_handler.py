@@ -1,12 +1,14 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 from urllib.parse import urlparse
-from views.user_requests import create_user, login_user, get_all_users, get_single_user
+from views.user_requests import create_user, login_user, get_all_users, get_single_user, update_user, delete_user
 from views import(get_all_comments,
                   get_single_comment,
                   create_comment,
                   delete_comment,
-                  update_comment)
+                  update_comment,
+                  get_all_posts, get_single_post, create_post, delete_post, update_post)
+
 class HandleRequests(BaseHTTPRequestHandler):
     """Handles the requests to this server"""
 
@@ -78,6 +80,12 @@ class HandleRequests(BaseHTTPRequestHandler):
                     response = get_single_comment(id)
                 else:
                     response = get_all_comments()
+                    
+            if resource == "posts":
+                if id is not None:
+                    response = get_single_post(id)
+                else:
+                    response = get_all_posts()
 
         self.wfile.write(json.dumps(response).encode())
 
@@ -87,20 +95,24 @@ class HandleRequests(BaseHTTPRequestHandler):
         content_len = int(self.headers.get('content-length', 0))
         post_body = json.loads(self.rfile.read(content_len))
 
-        # Convert JSON string to a Python dictionary
         response = ''
         (resource, id ) = self.parse_url(self.path)
 
-        if resource == 'login':
+        if resource == "login":
             response = login_user(post_body)
-        if resource == 'register':
+
+        elif resource == "register":
             response = create_user(post_body)
+
         # Add a new comment to the list. Don't worry about
         # the orange squiggle, you'll define the create_comment
         # function next.
-        if resource == "comments":
+        elif resource == "users":
+            response = create_user(post_body)
+        elif resource == "comments":
             response = create_comment(post_body)
 
+        # Encode the new comment and send in response
         self.wfile.write(response.encode())
 
 
@@ -119,8 +131,12 @@ class HandleRequests(BaseHTTPRequestHandler):
         # Delete a single comment from the list
         if resource == "comments":
             success = update_comment(id, post_body)
-
-                # handle the value of success
+        if resource == "users":
+            success = update_user(id, post_body)
+        if resource == "posts":
+           success = update_post(id, post_body)
+            
+        # handle the value of success
         if success:
             self._set_headers(204)
         else:
@@ -128,7 +144,6 @@ class HandleRequests(BaseHTTPRequestHandler):
 
         # Encode the new comment and send in response
         self.wfile.write("".encode())
-
 
     def do_DELETE(self):
         """Handle DELETE Requests"""
@@ -138,9 +153,13 @@ class HandleRequests(BaseHTTPRequestHandler):
         # Parse the URL
         (resource, id) = self.parse_url(self.path)
 
+        if resource == "users":
+            delete_user(id)
         # Delete a single comment from the list
         if resource == "comments":
             delete_comment(id)
+        elif resource == "posts":
+            delete_post(id)
 
         # Encode the new user and send in response
             self.wfile.write("".encode())
