@@ -104,6 +104,8 @@ class HandleRequests(BaseHTTPRequestHandler):
             response = create_user(post_body)
         elif resource == "comments":
             response = create_comment(post_body)
+        elif resource == "posts":
+            response = create_post(post_body)
 
         # Encode the new comment and send in response
         self.wfile.write(response.encode())
