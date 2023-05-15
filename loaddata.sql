@@ -85,12 +85,12 @@ INSERT INTO Categories ('label') VALUES ('News');
 INSERT INTO Tags ('label') VALUES ('JavaScript');
 INSERT INTO Reactions ('label', 'image_url') VALUES ('happy', 'https://pngtree.com/so/happy');
 
-
 INSERT INTO `Users` VALUES (null, "Charles", "Bridgers", "mcmaster@gmail.com", "This is your favorite local hip-hop host!", "c4theexplosive", "password", "8/6/2022", 0);
 INSERT INTO `Users` VALUES (null, "Instructor", "Danny", "pythonnerd12@gmail.com", "Junior instructor for NSS!", "dantheman", "password", "6/12/2022", 0);
 INSERT INTO `Users` VALUES (null, "Angie", "Gonzalez", "eagleeyeangie@gmail.com", "Music theory and coding wiz!", "eagleeyeangie", "password", "2/4/2023", 1);
 
 DROP TABLE Users;
+
 CREATE TABLE `Comment` (
     `id`    INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     `author_id`    TEXT NOT NULL,
@@ -115,6 +115,30 @@ INSERT INTO `Comments` VALUES (null, 1, 1, "This is a comment for a post.");
 INSERT INTO `Comments` VALUES (2, 2, 2, "This is a comment for another post.");
 INSERT INTO `Comments` VALUES (3, 3, 3, "This is a comment for yet another post.");
 
+
+DROP Table Users;
+
+INSERT INTO `Subscriptions` VALUES (null, 1, 3, 06/11/2022);
+INSERT INTO `Subscriptions` VALUES (2, 2, 3, 06/12/2022);
+
+SELECT
+    c.id,
+    c.author_id,
+    c.post_id,
+    c.content,
+    u.id user_id,
+    u.first_name,
+    u.last_name,
+    u.email,
+    u.bio,
+    u.username,
+    u.password,
+    u.created_on,
+    u.active
+FROM Comments c
+JOIN Users u
+    ON u.id = c.author_id
+
 INSERT INTO `Posts` VALUES (1, 1, "Love Effects", "5/9/2023", "Love Makes Everything Better" );
 INSERT INTO `Posts` VALUES (2, 2, "Hate Effects", "5/10/2023", "Hate Makes Everything Worst" );
 INSERT INTO `Posts` VALUES (3, 3, "I Need Food", "5/11/2023", "Food Makes Everything Better" );
@@ -137,3 +161,4 @@ SELECT
 FROM Posts p
 JOIN Users u
     ON u.id = p.user_id
+

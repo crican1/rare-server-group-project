@@ -175,7 +175,7 @@ def get_single_user(id):
 
         # Load the single result into memory
         data = db_cursor.fetchone()
-        
+
         # Create an animal instance from the current row
         user = User(data['id'], data['first_name'], data['last_name'], data['email'],
                             data['bio'], data['username'],
