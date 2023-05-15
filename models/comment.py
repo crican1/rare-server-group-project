@@ -1,5 +1,6 @@
 #Defining a class for comments.
 class Comment():
+    """This is the model for comments."""
 
     # Class initializer. It has 5 custom parameters, with the
     # special `self` parameter that every method on a class
