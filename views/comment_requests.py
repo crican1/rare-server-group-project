@@ -66,16 +66,7 @@ def get_all_comments():
             comment = Comment(row['id'],
                               row['author_id'],
                               row['post_id'],
-                              row['content'],
-                              row['user_id'],
-                              row['first_name'],
-                              row['last_name'],
-                              row['email'],
-                              row['bio'],
-                              row['username'],
-                              row['password'],
-                              row['created_on'],
-                              row['active'])
+                              row['content'],)
 
             # Create a user instance from the current row
             user = User(row['user_id'],
@@ -135,27 +126,17 @@ def get_single_comment(id):
         comment = Comment(data['id'],
                           data['author_id'],
                           data['post_id'],
-                          data['content'],
-                          data['user_id'],
-                          data['first_name'],
-                          data['last_name'],
-                          data['email'],
-                          data['bio'],
-                          data['username'],
-                          data['password'],
-                          data['created_on'],
-                          data['active'])
-
+                          data['content'],)
 
         user = User(data['user_id'],
-                          data['first_name'],
-                          data['last_name'],
-                          data['email'],
-                          data['bio'],
-                          data['username'],
-                          data['password'],
-                          data['created_on'],
-                          data['active'])
+                    data['first_name'],
+                    data['last_name'],
+                    data['email'],
+                    data['bio'],
+                    data['username'],
+                    data['password'],
+                    data['created_on'],
+                    data['active'])
 
         comment.user = user.__dict__
 
