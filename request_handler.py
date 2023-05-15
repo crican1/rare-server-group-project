@@ -1,6 +1,6 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
-from urllib.parse import urlparse
+from urllib.parse import urlparse, parse_qs
 from views.user_requests import create_user, login_user, get_all_users, get_single_user
 from views import(get_all_comments,
                   get_single_comment,
@@ -8,9 +8,8 @@ from views import(get_all_comments,
                   delete_comment, get_all_posts, get_single_post, create_post,
                   delete_post, update_post)
 from views import(get_all_subscriptions,
-                  get_single_subscription,
                   create_subscription,
-                  delete_subscription)
+                  delete_subscription, get_subscriptions_by_follower_id)
 
 class HandleRequests(BaseHTTPRequestHandler):
     """Handles the requests to this server"""
@@ -18,22 +17,20 @@ class HandleRequests(BaseHTTPRequestHandler):
     def parse_url(self, path):
         """Parse the url into the resource and id"""
         parsed_url = urlparse(path)
-        path_params = parsed_url.path.split('/')
+        path_params = parsed_url.path.split('/')  # ['', 'animals', 1]
         resource = path_params[1]
-        if '?' in resource:
-            param = resource.split('?')[1]
-            resource = resource.split('?')[0]
-            pair = param.split('=')
-            key = pair[0]
-            value = pair[1]
-            return (resource, key, value)
-        else:
-            id = None
-            try:
-                id = int(path_params[2])
-            except (IndexError, ValueError):
-                pass
-            return (resource, id)
+
+        if parsed_url.query:
+            query = parse_qs(parsed_url.query)
+            return (resource, query)
+
+        pk = None
+        try:
+            pk = int(path_params[2])
+        except (IndexError, ValueError):
+            pass
+        return (resource, pk)
+
 
     def _set_headers(self, status):
         """Sets the status code, Content-Type and Access-Control-Allow-Origin
@@ -84,18 +81,22 @@ class HandleRequests(BaseHTTPRequestHandler):
                 else:
                     response = get_all_comments()
 
-            if resource == "subscriptions":
-                if id is not None:
-                    response = get_single_subscription(id)
-
-                else:
-                    response = get_all_subscriptions()
-
             if resource == "posts":
                 if id is not None:
                     response = get_single_post(id)
                 else:
                     response = get_all_posts()
+
+            if resource == "subscriptions":
+                response = get_all_subscriptions()
+
+        else:  # There is a ? in the path, run the query param functions
+            (resource, query) = parsed
+
+            if query.get('follower_id') and resource == 'subscription_posts':
+                response = get_subscriptions_by_follower_id(query['follower_id'][0])
+
+
 
         self.wfile.write(json.dumps(response).encode())
 

@@ -1,6 +1,7 @@
 import sqlite3
 import json
 from models import Subscription
+from .post_request import get_post_by_user
 
 SUBSCRIPTIONS = [
     {
@@ -126,3 +127,38 @@ def delete_subscription(id):
         DELETE FROM Subscriptions
         WHERE id = ?
         """, (id, ))
+
+def get_subscriptions_by_follower_id(follower_id):
+    """gets all subscription posts"""
+    with sqlite3.connect("./db.sqlite3") as conn:
+
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor()
+        db_cursor.execute("""
+        SELECT 
+            s.id,
+            s.follower_id,
+            s.author_id,
+            s.created_on
+        FROM subscriptions s
+        WHERE s.follower_id = ?
+        """, ( follower_id, ))
+
+        follower_subscriptions = []
+        subscription_posts = []
+
+        dataset = db_cursor.fetchall()
+
+        for row in dataset:
+            subscription = Subscription(row['id'], row['follower_id'], row['author_id'],
+                                        row['created_on'])
+
+            subscription_author_id = subscription.author_id
+
+            subscription_posts.append(get_post_by_user(subscription_author_id))
+
+            subscription.post = subscription_posts
+
+            follower_subscriptions.append(subscription.__dict__)
+
+    return follower_subscriptions

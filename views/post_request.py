@@ -1,6 +1,6 @@
 import sqlite3
 import json
-from models import Posts, User
+from models import Posts
 
 POSTS = [
     {
@@ -35,6 +35,8 @@ POSTS = [
 
 
 def get_all_posts():
+    """DOCSTRING
+    """
     # Open a connection to the database
     with sqlite3.connect("./db.sqlite3") as conn:
 
@@ -80,6 +82,8 @@ def get_all_posts():
 
 
 def get_single_post(id):
+    """DOCSTRING
+    """
     with sqlite3.connect("./db.sqlite3") as conn:
         conn.row_factory = sqlite3.Row
         db_cursor = conn.cursor()
@@ -108,6 +112,8 @@ def get_single_post(id):
 
 
 def create_post(new_post):
+    """DOCSTRING
+    """
     # Open a connection to the database
     with sqlite3.connect("./db.sqlite3") as conn:
 
@@ -136,6 +142,8 @@ def create_post(new_post):
     return json.dumps(new_post)
 
 def delete_post(id):
+    """DOCSTRING
+    """
     with sqlite3.connect("./db.sqlite3") as conn:
         db_cursor = conn.cursor()
 
@@ -143,7 +151,7 @@ def delete_post(id):
         DELETE FROM Posts
         WHERE id = ?
         """, (id, ))
-        
+
 
 def update_post(id, new_post):
     """To PUT a post"""
@@ -174,3 +182,29 @@ def update_post(id, new_post):
     else:
         # Forces 204 response by main module
         return True
+
+def get_post_by_user(user_id):
+    '''gets post by user'''
+    with sqlite3.connect("./db.sqlite3") as conn:
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor()
+
+        db_cursor.execute("""
+        SELECT
+            p.id,
+            p.user_id,
+            p.title,
+            p.publication_date,
+            p.content
+        FROM Posts p
+        WHERE p.user_id = ?                  
+        """, ( user_id, ))
+
+        posts = []
+        dataset = db_cursor.fetchall()
+
+        for row in dataset:
+            post = Posts(row['id'], row['user_id'], row['title'],
+                         row['publication_date'], row['content'])
+            posts.append(post.__dict__)
+    return posts

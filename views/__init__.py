@@ -6,5 +6,6 @@ from .comment_requests import (get_all_comments,
 from .subscription_requests import (get_all_subscriptions,
                                get_single_subscription,
                                create_subscription,
-                               delete_subscription)
-from .post_request import get_all_posts, get_single_post, create_post, delete_post, update_post
+                               delete_subscription, get_subscriptions_by_follower_id)
+from .post_request import (get_all_posts, get_single_post, create_post, delete_post,
+                               update_post, get_post_by_user)
