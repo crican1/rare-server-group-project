@@ -1,7 +1,7 @@
 import sqlite3
 import json
-from models import User
 from datetime import datetime
+from models import User
 
 USERS = [
     {
@@ -46,7 +46,8 @@ def login_user(user):
         user (dict): Contains the username and password of the user trying to login
 
     Returns:
-        json string: If the user was found will return valid boolean of True and the user's id as the token
+        json string: If the user was found will return valid boolean of True and the user's 
+        id as the token
                      If the user was not found will return valid boolean False
     """
     with sqlite3.connect('./db.sqlite3') as conn:
@@ -108,6 +109,8 @@ def create_user(user):
         })
 
 def get_all_users():
+    """DOCSTRING
+    """
     # Open a connection to the database
     with sqlite3.connect("./db.sqlite3") as conn:
 
@@ -147,11 +150,14 @@ def get_all_users():
                             row['bio'], row['username'],
                             row['password'], row['created_on'], row['active'])
 
-            users.append(user.__dict__) # see the notes below for an explanation on this line of code.
+            users.append(user.__dict__)
+            # see the notes below for an explanation on this line of code.
 
     return users
 
 def get_single_user(id):
+    """DOCSTRING
+    """
     with sqlite3.connect("./db.sqlite3") as conn:
         conn.row_factory = sqlite3.Row
         db_cursor = conn.cursor()

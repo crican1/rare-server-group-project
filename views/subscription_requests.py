@@ -1,19 +1,20 @@
 import sqlite3
 import json
 from models import Subscription
+from .post_request import get_post_by_user
 
 SUBSCRIPTIONS = [
     {
         "id": 1,
-        "follower_id": 2,
-        "author_id": "Nashville North",
-        "created_on": "8422 Johnson Pike"
+        "follower_id": 1,
+        "author_id": 3,
+        "created_on": '6/11/2022'
     },
     {
         "id": 2,
         "follower_id": 2,
-        "author_id": "Nashville North",
-        "created_on": "8422 Johnson Pike"
+        "author_id": 3,
+        "created_on": '6/12/2022'
     }
 ]
 
@@ -34,7 +35,7 @@ def get_all_subscriptions():
             a.follower_id,
             a.author_id,
             a.created_on
-        FROM subscription a
+        FROM Subscriptions a
         """)
 
         # Initialize an empty list to hold all animal representations
@@ -73,7 +74,7 @@ def get_single_subscription(id):
             a.follower_id,
             a.author_id,
             a.created_on
-        FROM subscription a
+        FROM Subscriptions a
         WHERE a.id = ?
         """, ( id, ))
 
@@ -86,37 +87,78 @@ def get_single_subscription(id):
 
         return subscription.__dict__
 
-def create_subscription(subscription):
+def create_subscription(new_subscription):
     """DOCSTRING
     """
-    # Get the id value of the last animal in the list
-    max_id = SUBSCRIPTIONS[-1]["id"]
+      # Open a connection to the database
+    with sqlite3.connect("./db.sqlite3") as conn:
 
-    # Add 1 to whatever that number is
-    new_id = max_id + 1
+        # Just use these. It's a Black Box.
+        db_cursor = conn.cursor()
 
-    # Add an `id` property to the animal dictionary
-    subscription["id"] = new_id
+        db_cursor.execute("""
+        INSERT INTO Subscriptions
+            ( author_id, follower_id, created_on )
+        VALUES
+            ( ?, ?, ?);
+        """, (new_subscription['author_id'],
+              new_subscription['follower_id'],
+              new_subscription['created_on'], ))
+        # The `lastrowid` property on the cursor will return
+        # the primary key of the last thing that got added to
+        # the database.
+        id = db_cursor.lastrowid
 
-    # Add the animal dictionary to the list
-    SUBSCRIPTIONS.append(subscription)
+        # Add the `id` property to the comment dictionary that
+        # was sent by the client so that the client sees the
+        # primary key in the response.
+        new_subscription['id'] = id
 
-    # Return the dictionary with `id` property added
-    return subscription
+
+    return json.dumps(new_subscription)
 
 def delete_subscription(id):
     """DOCSTRING
     """
-    # Initial -1 value for animal index, in case one isn't found
-    subscription_index = -1
+    with sqlite3.connect("./db.sqlite3") as conn:
+        db_cursor = conn.cursor()
 
-    # Iterate the ANIMALS list, but use enumerate() so that you
-    # can access the index value of each item
-    for index, subscription in enumerate(SUBSCRIPTIONS):
-        if subscription["id"] == id:
-            # Found the animal. Store the current index.
-            subscription_index = index
+        db_cursor.execute("""
+        DELETE FROM Subscriptions
+        WHERE id = ?
+        """, (id, ))
 
-    # If the animal was found, use pop(int) to remove it from list
-    if subscription_index >= 0:
-        SUBSCRIPTIONS.pop(subscription_index)
+def get_subscriptions_by_follower_id(follower_id):
+    """gets all subscription posts"""
+    with sqlite3.connect("./db.sqlite3") as conn:
+
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor()
+        db_cursor.execute("""
+        SELECT 
+            s.id,
+            s.follower_id,
+            s.author_id,
+            s.created_on
+        FROM subscriptions s
+        WHERE s.follower_id = ?
+        """, ( follower_id, ))
+
+        follower_subscriptions = []
+        subscription_posts = []
+
+        dataset = db_cursor.fetchall()
+
+        for row in dataset:
+            subscription = Subscription(row['id'], row['follower_id'], row['author_id'],
+                                        row['created_on'])
+
+            subscription_author_id = subscription.author_id
+
+            subscription_posts.append(get_post_by_user(subscription_author_id))
+
+            subscription.post = subscription_posts
+
+            follower_subscriptions.append(subscription.__dict__)
+
+    return follower_subscriptions

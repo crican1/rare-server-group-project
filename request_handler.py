@@ -7,7 +7,15 @@ from views import(get_all_comments,
                   create_comment,
                   delete_comment,
                   update_comment,
-                  get_all_posts, get_single_post, create_post, delete_post, update_post)
+                  get_all_posts,
+                  get_single_post,
+                  create_post,
+                  delete_post,
+                  update_post,
+                  get_all_subscriptions,
+                  create_subscription,
+                  delete_subscription,
+                  get_subscriptions_by_follower_id)
 
 class HandleRequests(BaseHTTPRequestHandler):
     """Handles the requests to this server"""
@@ -15,22 +23,20 @@ class HandleRequests(BaseHTTPRequestHandler):
     def parse_url(self, path):
         """Parse the url into the resource and id"""
         parsed_url = urlparse(path)
-        path_params = parsed_url.path.split('/')
+        path_params = parsed_url.path.split('/')  # ['', 'animals', 1]
         resource = path_params[1]
-        if '?' in resource:
-            param = resource.split('?')[1]
-            resource = resource.split('?')[0]
-            pair = param.split('=')
-            key = pair[0]
-            value = pair[1]
-            return (resource, key, value)
-        else:
-            id = None
-            try:
-                id = int(path_params[2])
-            except (IndexError, ValueError):
-                pass
-            return (resource, id)
+
+        if parsed_url.query:
+            query = parse_qs(parsed_url.query)
+            return (resource, query)
+
+        pk = None
+        try:
+            pk = int(path_params[2])
+        except (IndexError, ValueError):
+            pass
+        return (resource, pk)
+
 
     def _set_headers(self, status):
         """Sets the status code, Content-Type and Access-Control-Allow-Origin
@@ -80,12 +86,23 @@ class HandleRequests(BaseHTTPRequestHandler):
                     response = get_single_comment(id)
                 else:
                     response = get_all_comments()
-                    
+
             if resource == "posts":
                 if id is not None:
                     response = get_single_post(id)
                 else:
                     response = get_all_posts()
+
+            if resource == "subscriptions":
+                response = get_all_subscriptions()
+
+        else:  # There is a ? in the path, run the query param functions
+            (resource, query) = parsed
+
+            if query.get('follower_id') and resource == 'subscription_posts':
+                response = get_subscriptions_by_follower_id(query['follower_id'][0])
+
+
 
         self.wfile.write(json.dumps(response).encode())
 
@@ -94,6 +111,9 @@ class HandleRequests(BaseHTTPRequestHandler):
         self._set_headers(201)
         content_len = int(self.headers.get('content-length', 0))
         post_body = json.loads(self.rfile.read(content_len))
+
+        # Convert JSON string to a Python dictionary
+        post_body = json.dumps(post_body)
 
         response = ''
         (resource, id ) = self.parse_url(self.path)
@@ -109,6 +129,10 @@ class HandleRequests(BaseHTTPRequestHandler):
         # function next.
         elif resource == "users":
             response = create_user(post_body)
+        if resource == 'subscriptions':
+            response = create_subscription(post_body)
+        if resource == 'comments':
+            response = create_comment(post_body)
         elif resource == "comments":
             response = create_comment(post_body)
         elif resource == "posts":
@@ -117,6 +141,18 @@ class HandleRequests(BaseHTTPRequestHandler):
         # Encode the new comment and send in response
         self.wfile.write(response.encode())
 
+
+        # Initialize new comment
+        new_comment = None
+
+        # Add a new comment to the list. Don't worry about
+        # the orange squiggle, you'll define the create_comment
+        # function next.
+        if resource == "comments":
+            new_comment = create_comment(post_body)
+
+        # Encode the new comment and send in response
+            self.wfile.write(json.dumps(new_comment).encode())
 
     def do_PUT(self):
         """Handles PUT requests to the server"""
@@ -129,6 +165,7 @@ class HandleRequests(BaseHTTPRequestHandler):
 
          # set default value of success
         success = False
+
 
         # Delete a single comment from the list
         if resource == "comments":
@@ -144,7 +181,7 @@ class HandleRequests(BaseHTTPRequestHandler):
         else:
             self._set_headers(404)
 
-        # Encode the new comment and send in response
+        # Encode the new animal and send in response
         self.wfile.write("".encode())
 
     def do_DELETE(self):
@@ -160,6 +197,8 @@ class HandleRequests(BaseHTTPRequestHandler):
         # Delete a single comment from the list
         if resource == "comments":
             delete_comment(id)
+        if resource == "subscriptions":
+            delete_subscription(id)
         elif resource == "posts":
             delete_post(id)
 

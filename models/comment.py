@@ -1,5 +1,7 @@
 #Defining a class for comments.
 class Comment():
+    """DOCSTRING
+    """
     """This is the model for comments."""
 
     # Class initializer. It has 5 custom parameters, with the
