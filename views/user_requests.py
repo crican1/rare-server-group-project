@@ -12,7 +12,7 @@ USERS = [
         "bio": "This is your favorite local hip-hop host!",
         "username": "c4theexplosive",
         "password": "password",
-        "created_on": 8/6/2022,
+        "created_on": "8/6/2022",
         "active": False
     },
     {
@@ -23,7 +23,7 @@ USERS = [
         "bio": "Junior instructor for NSS!",
         "username": "dantheman",
         "password": "password",
-        "created_on": 6/12/2022,
+        "created_on": "6/12/2022",
         "active": False
     },
     {
@@ -34,7 +34,7 @@ USERS = [
         "bio": "Music theory and coding wiz!",
         "username": "eagleeyeangie",
         "password": "password",
-        "created_on": 2/4/2023,
+        "created_on": "2/4/2023",
         "active": False
     }
 ]
@@ -184,10 +184,43 @@ def get_single_user(id):
         return user.__dict__
 
 def update_user(id, new_user):
-    # Iterate the ANIMALS list, but use enumerate() so that
-    # you can access the index value of each item.
-    for index, user in enumerate(USERS):
-        if user["id"] == id:
-            # Found the animal. Update the value.
-            USERS[index] = new_user
-            break
+    with sqlite3.connect("./db.sqlite3") as conn:
+        db_cursor = conn.cursor()
+
+        db_cursor.execute("""
+        UPDATE Users
+            SET
+                first_name = ?,
+                last_name = ?,
+                email = ?,
+                bio = ?,
+                username = ?,
+                password = ?,
+                created_on = ?,
+                active = ?
+        WHERE id = ?
+        """, (new_user['first_name'], new_user['last_name'], new_user['email'],
+              new_user['bio'], new_user['username'], new_user['password'],
+              new_user['created_on'], new_user['active'], id, ))
+
+        # Were any rows affected?
+        # Did the client send an `id` that exists?
+        rows_affected = db_cursor.rowcount
+
+    # return value of this function
+    if rows_affected == 0:
+        # Forces 404 response by main module
+        return False
+    else:
+        # Forces 204 response by main module
+        return True
+
+def delete_user(id):
+    # Initial -1 value for animal index, in case one isn't found
+    with sqlite3.connect("./db.sqlite3") as conn:
+        db_cursor = conn.cursor()
+
+        db_cursor.execute("""
+        DELETE FROM Users
+        WHERE id = ?
+        """, (id, ))
